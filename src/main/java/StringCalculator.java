@@ -1,11 +1,12 @@
 public class StringCalculator {
 
+    private static final String EMPTY_STRING = "";
+
     public int Add(String numbers) {
-        String j = "";
-        if (numbers.equals(j)) {
+        if (numbers.equals(EMPTY_STRING)) {
             return 0;
         } else {
-            String list[] = null;
+            String list[];
             Integer newList[] = null;
             list = numbers.split(",");
             int summary = 0;
