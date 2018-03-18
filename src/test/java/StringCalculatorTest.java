@@ -38,6 +38,12 @@ public class StringCalculatorTest {
     }
 
     @Test
+    public void shouldReturnZeroOnRandomString() throws  Exception {
+        int result = testedObject.add("skss");
+        assertThat(result).isEqualTo(0);
+    }
+
+    @Test
     public void shouldRetrunNumberIfOneNumberIsGiven() throws Exception {
 
         int result = testedObject.add("1");
