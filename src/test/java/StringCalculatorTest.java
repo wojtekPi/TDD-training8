@@ -20,6 +20,7 @@ public class StringCalculatorTest {
 
     private Object[][] paramsForTestingValue() {
         return new Object[][]{
+                {"", 0},
                 {"0", 0},
                 {"1", 1},
                 {"2", 2},
