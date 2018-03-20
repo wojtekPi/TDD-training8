@@ -27,8 +27,8 @@ public class PaymentServiceTest {
     @Before
     public void setUp() {
         testedObject = new PaymentService();
-        from = new Account(FROM, new Instrument(Currency.EUR,0));
-        to = new Account(TO, new Instrument(Currency.EUR,0));
+        from = new Account(FROM, 0,Currency.EUR );
+        to = new Account(TO,0, Currency.EUR);
     }
 
 

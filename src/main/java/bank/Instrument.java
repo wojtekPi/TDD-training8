@@ -1,5 +1,7 @@
 package bank;
 
+import java.util.Objects;
+
 public class Instrument {
 
     private Currency currency;
@@ -24,5 +26,20 @@ public class Instrument {
 
     public void setAmount(int amount) {
         this.amount = amount;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Instrument)) return false;
+        Instrument that = (Instrument) o;
+        return getAmount() == that.getAmount() &&
+                getCurrency() == that.getCurrency();
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(getCurrency(), getAmount());
     }
 }
