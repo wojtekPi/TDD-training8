@@ -27,16 +27,10 @@ public class PaymentServiceTest {
     @Before
     public void setUp() {
         testedObject = new PaymentService();
-        from = new Account(FROM, 0);
-        to = new Account(TO, 0);
+        from = new Account(FROM, 0,Currency.EUR );
+        to = new Account(TO,0, Currency.EUR);
     }
 
-    @Test
-    public void shouldCreatePaymentServiceAndCallMethod() throws Exception {
-        PaymentService testedObject = new PaymentService();
-
-        testedObject.transferMoney(from, to, 0);
-    }
 
     private Object[][] paramsForTestingBankTransfer() {
         return new Object[][]{
@@ -49,45 +43,53 @@ public class PaymentServiceTest {
 
     @Test
     @Parameters(method = "paramsForTestingBankTransfer")
-    public void shouldReturnCorrectAmountOn3SetParameters(int fromAmount, int toAmount,
-                                                          int transactionAmount, int fromExpected, int toExpected) {
+    public void shouldReturnCorrectAmountWithNewObjectAsParams(int fromAmount, int toAmount,
+                                                               int transactionAmount, int fromExpected, int toExpected) {
         from.setBalance(fromAmount);
         to.setBalance(toAmount);
 
-        testedObject.transferMoney(from, to, transactionAmount);
 
-        assertThat(from.getBalance()).isEqualTo(fromExpected);
-        assertThat(to.getBalance()).isEqualTo(toExpected);
+        Instrument instrument = new Instrument(Currency.EUR, transactionAmount);
+
+        testedObject.transferMoney(from, to, instrument);
+
+        assertThat(from.getBalance().getAmount()).isEqualTo(fromExpected);
+        assertThat(to.getBalance().getAmount()).isEqualTo(toExpected);
+
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowIllegalArgumentExceptionWhenNotEnoughMoney() throws Exception {
         from.setBalance(-501);
+        Instrument sevenEUR = new Instrument(Currency.EUR, 7);
 
-        testedObject.transferMoney(from, to, 7);
+        testedObject.transferMoney(from, to, sevenEUR);
     }
 
     @Test
     public void shouldHasCorrectExcepionMessageWhenNotEnoughMoney() {
         from.setBalance(-501);
+        Instrument sevenEUR = new Instrument(Currency.EUR, 7);
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(NOT_ENOUGH_MONEY_TEXT);
 
-        testedObject.transferMoney(from, to, 7);
+        testedObject.transferMoney(from, to, sevenEUR);
 
         //This assertions will be not triggered!!!
-        assertThat(from.getBalance()).isEqualTo(0);
+        assertThat(from.getBalance().getAmount()).isEqualTo(0);
     }
 
     @Test
     public void shouldNotChengeBalanceWhenExceptionWasThrown() throws Exception {
         from.setBalance(-501);
+        Instrument sevenEUR = new Instrument(Currency.EUR, 7);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> testedObject.transferMoney(from, to, 7))
+                .isThrownBy(() -> testedObject.transferMoney(from, to, sevenEUR))
                 .withMessage(NOT_ENOUGH_MONEY_TEXT);
 
-        assertThat(from.getBalance()).isEqualTo(-501);
-        assertThat(to.getBalance()).isEqualTo(0);
+        assertThat(from.getBalance().getAmount()).isEqualTo(-501);
+        assertThat(to.getBalance().getAmount()).isEqualTo(0);
     }
+
 }
