@@ -9,7 +9,7 @@ public class PaymentService {
     public void transferMoney(Account from , Account to, Instrument howMoney) {
         if (from.getBalance().getAmount() < LIMIT_AMOUNT) {
             throw new IllegalArgumentException(NOT_ENOUGH_MONEY_TEXT);
-        } else if (from.getBalance().getCurrency() != to.getBalance().getCurrency() &
+        } else if (from.getBalance().getCurrency() != to.getBalance().getCurrency() &&
                     to.getBalance().getCurrency() != howMoney.getCurrency()) {
             throw new IllegalArgumentException(CURRENCIES_ARE_INCOMPATIBILE );
         }

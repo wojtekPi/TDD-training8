@@ -105,7 +105,6 @@ public class PaymentServiceTest {
 
         assertThat(from1.getBalance().getAmount()).isEqualTo(100);
         assertThat(to1.getBalance().getAmount()).isEqualTo(100);
-
     }
 
 }
