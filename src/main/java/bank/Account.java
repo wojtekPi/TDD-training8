@@ -3,24 +3,18 @@ package bank;
 public class Account {
 
     private String id;
-    private Instrument balance;
+    private int balance;
 
-    public Account(String id, int balance, Currency curr) {
-        this.id = id;
-        this.balance = new Instrument(curr, balance);
-    }
-
-    public Account(String id, Instrument balance) {
+    public Account(String id, int balance) {
         this.id = id;
         this.balance = balance;
     }
 
-    public Instrument getBalance() {
+    public int getBalance() {
         return balance;
     }
 
     public void setBalance(int amount) {
-         this.balance.setAmount( amount);
+         this.balance = this.balance + amount;
     }
-
- }
+}
