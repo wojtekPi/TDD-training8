@@ -17,6 +17,7 @@ public class PaymentServiceTest {
     private static final String TO = "to";
     private static final String NOT_ENOUGH_MONEY_TEXT = "I'm very sorry, but you don't have enough money...";
     private PaymentService testedObject;
+    private Instrument instrument;
     private Account from;
     private Account to;
 
@@ -27,15 +28,15 @@ public class PaymentServiceTest {
     @Before
     public void setUp() {
         testedObject = new PaymentService();
-        from = new Account(FROM, 0);
-        to = new Account(TO, 0);
+        from = new Account(FROM, 0, Currency.PLN);
+        to = new Account(TO, 0, Currency.PLN);
     }
 
     @Test
     public void shouldCreatePaymentServiceAndCallMethod() throws Exception {
         PaymentService testedObject = new PaymentService();
 
-        testedObject.transferMoney(from, to, 0);
+        testedObject.transferMoney(from, to, instrument);
     }
 
     private Object[][] paramsForTestingBankTransfer() {
@@ -54,7 +55,7 @@ public class PaymentServiceTest {
         from.setBalance(fromAmount);
         to.setBalance(toAmount);
 
-        testedObject.transferMoney(from, to, transactionAmount);
+        testedObject.transferMoney(from, to, instrument);
 
         assertThat(from.getBalance()).isEqualTo(fromExpected);
         assertThat(to.getBalance()).isEqualTo(toExpected);
@@ -64,7 +65,7 @@ public class PaymentServiceTest {
     public void shouldThrowIllegalArgumentExceptionWhenNotEnoughMoney() throws Exception {
         from.setBalance(-501);
 
-        testedObject.transferMoney(from, to, 7);
+        testedObject.transferMoney(from, to, instrument);
     }
 
     @Test
@@ -73,7 +74,9 @@ public class PaymentServiceTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(NOT_ENOUGH_MONEY_TEXT);
 
-        testedObject.transferMoney(from, to, 7);
+        Instrument transfer = new Instrument(7, Currency.PLN);
+
+        testedObject.transferMoney(from, to, transfer);
 
         //This assertions will be not triggered!!!
         assertThat(from.getBalance()).isEqualTo(0);
@@ -82,12 +85,18 @@ public class PaymentServiceTest {
     @Test
     public void shouldNotChengeBalanceWhenExceptionWasThrown() throws Exception {
         from.setBalance(-501);
+        Instrument transfer = new Instrument(7, Currency.PLN);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> testedObject.transferMoney(from, to, 7))
+                .isThrownBy(() -> testedObject.transferMoney(from, to, transfer))
                 .withMessage(NOT_ENOUGH_MONEY_TEXT);
 
         assertThat(from.getBalance()).isEqualTo(-501);
         assertThat(to.getBalance()).isEqualTo(0);
+    }
+
+    @Test
+    public void fromAccountCheckCurrenciesOnAccount(){
+        assertThat(from.getCurrency()).isEqualTo(Currency.valueOf("PLN"));
     }
 }
