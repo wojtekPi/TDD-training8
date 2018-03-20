@@ -16,6 +16,7 @@ public class PaymentServiceTest {
     private static final String FROM = "from";
     private static final String TO = "to";
     private static final String NOT_ENOUGH_MONEY_TEXT = "I'm very sorry, but you don't have enough money...";
+    public static final String CURRENCIES_ARE_INCOMPATIBILE = "Currencies  are incompatibile ";
     private PaymentService testedObject;
     private Account from;
     private Account to;
@@ -90,6 +91,20 @@ public class PaymentServiceTest {
 
         assertThat(from.getBalance().getAmount()).isEqualTo(-501);
         assertThat(to.getBalance().getAmount()).isEqualTo(0);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenAllCurrenciesAreNotCompatibile() {
+        Account from1 = new Account("from1",100, Currency.EUR );
+        Account to1  = new Account("to1", 100, Currency.PLN );
+        Instrument transferMoney = new Instrument(Currency.EUR, 10 );
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> testedObject.transferMoney(from1,to1,transferMoney))
+                .withMessage(CURRENCIES_ARE_INCOMPATIBILE);
+
+        assertThat(from1.getBalance().getAmount()).isEqualTo(100);
+        assertThat(to1.getBalance().getAmount()).isEqualTo(100);
     }
 
 }
