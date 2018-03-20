@@ -1,12 +1,15 @@
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tdd training on 16.03.18.
  */
-
+@RunWith(JUnitParamsRunner.class)
 public class StringCalculatorTest {
     private StringCalculator testedObject;
 
@@ -15,66 +18,27 @@ public class StringCalculatorTest {
         testedObject = new StringCalculator();
     }
 
-    @Test
-    public void shouldCreateObject() throws Exception {
-        assertThat(testedObject).isNotNull();
-
+    private Object[][] paramsForTestingValue() {
+        return new Object[][]{
+                {"", 0},
+                {"0", 0},
+                {"1", 1},
+                {"2", 2},
+                {"1002,7003", 8005},
+                {"1002,-1", 1001},
+                {"1002,-1,-100", 901},
+                {"-3,-1,-4", -8},
+                {"-8,0", -8},
+                {"1,2,3", 6},
+                {"1,2,30000", 30003},
+        };
     }
 
     @Test
-    public void shouldReturnZeroForEmptyString() {
-        int result = testedObject.Add("");
-        assertThat(result).isEqualTo(0);
+    @Parameters(method = "paramsForTestingValue")
+    public void shouldReturnCorrectValue(String input, int expectedResult) {
+        int result = testedObject.Add(input);
+
+        assertThat(result).isEqualTo(expectedResult);
     }
-
-    @Test
-    public void shouldReturnOneForStringOne() {
-
-        int result = testedObject.Add("1");
-
-        assertThat(result).isEqualTo(1);
-    }
-
-    @Test
-    public void shouldReturnThreeForStringsOneandTwo() {
-        int result = testedObject.Add("1,2");
-        assertThat(result).isEqualTo(3);
-    }
-
-    @Test
-    public void shouldReturn1112For1000Plus112() {
-        int result = testedObject.Add("1000,112");
-        assertThat(result).isEqualTo(1112);
-    }
-
-    @Test
-    public void shouldReturnMinus10For10PlusMinus10() {
-        int result = testedObject.Add("0,-10");
-        assertThat(result).isEqualTo(-10);
-    }
-
-    @Test
-    public void shouldReturnMinusForMinusArguments() {
-        int result = testedObject.Add("-3,-4");
-        assertThat(result).isEqualTo(-7);
-    }
-
-    @Test
-    public void shouldReturnMinusForZeroPlusMinusArgument() {
-        int result = testedObject.Add("0,-4");
-        assertThat(result).isEqualTo(-4);
-    }
-
-    @Test
-    public void shouldReturnSummaryForThreeArguments() {
-        int result = testedObject.Add("12,8,10");
-        assertThat(result).isEqualTo(30);
-    }
-    @Test
-    public void shouldReturnSummaryForFourArguments(){
-        int result = testedObject.Add("14,-7,7,10");
-        assertThat(result).isEqualTo(24);
-    }
-
-
 }
