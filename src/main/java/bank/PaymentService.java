@@ -1,5 +1,7 @@
 package bank;
 
+import java.time.LocalDateTime;
+
 public class PaymentService {
     private static final int LIMIT_AMOUNT = -500;
     private static final String NOT_ENOUGH_MONEY_TEXT =
@@ -8,7 +10,7 @@ public class PaymentService {
 
     private ExchangeService exchangeService;
     private TransactionDB databaseAccess;
-
+    private TimeProvider currentTime;
 
     public void transferMoney(Account from, Account to, Instrument howMoney) {
         if (from.getBalance().getAmount() < LIMIT_AMOUNT) {
@@ -26,7 +28,8 @@ public class PaymentService {
 
         from.setBalance(from.getBalance().getAmount() - howMoney.getAmount());
         to.setBalance(targetAmountOnToAccount);
-         databaseAccess.save(from,to,howMoney);
+        databaseAccess.save(from,to,howMoney, currentTime.getTime());
+
     }
 
     public void setExchangeService(ExchangeService exchangeService) {
@@ -35,5 +38,9 @@ public class PaymentService {
 
     public void setDatabaseAccess(TransactionDB transaction) {
         this.databaseAccess = transaction;
+    }
+
+    public void setTimeProvider(TimeProvider currentTime) {
+        this.currentTime = currentTime;
     }
 }
