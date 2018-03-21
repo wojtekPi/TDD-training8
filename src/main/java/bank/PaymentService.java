@@ -7,6 +7,7 @@ public class PaymentService {
     public static final String CURRENCIES_ARE_INCOMPATIBILE = "Currencies  are incompatibile ";
 
     private ExchangeService exchangeService;
+    private TransactionDB databaseAccess;
 
 
     public void transferMoney(Account from, Account to, Instrument howMoney) {
@@ -19,15 +20,20 @@ public class PaymentService {
         int targetAmountOnToAccount = to.getBalance().getAmount() + howMoney.getAmount();
 
         if (from.getBalance().getCurrency() != to.getBalance().getCurrency()) {
-            targetAmountOnToAccount = to.getBalance().getAmount() + exchangeService
-                    .calculate(howMoney, to.getBalance().getCurrency());
+            targetAmountOnToAccount = to.getBalance().getAmount() +
+                    exchangeService.calculate(howMoney, to.getBalance().getCurrency());
         }
 
         from.setBalance(from.getBalance().getAmount() - howMoney.getAmount());
         to.setBalance(targetAmountOnToAccount);
+         databaseAccess.save(from,to,howMoney);
     }
 
     public void setExchangeService(ExchangeService exchangeService) {
         this.exchangeService = exchangeService;
+    }
+
+    public void setDatabaseAccess(TransactionDB transaction) {
+        this.databaseAccess = transaction;
     }
 }
