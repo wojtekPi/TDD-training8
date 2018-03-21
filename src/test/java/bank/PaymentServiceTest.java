@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
 @RunWith(JUnitParamsRunner.class)
@@ -22,6 +23,7 @@ public class PaymentServiceTest {
     private PaymentService testedObject;
     private Account from;
     private Account to;
+    private TransactionDB transactionDB;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -30,6 +32,8 @@ public class PaymentServiceTest {
     @Before
     public void setUp() {
         testedObject = new PaymentService();
+        transactionDB = mock(TransactionDB.class);
+        testedObject.setTransactionDB(transactionDB);
         from = new Account(FROM, 0, Currency.EUR);
         to = new Account(TO, 0, Currency.EUR);
     }
@@ -83,7 +87,7 @@ public class PaymentServiceTest {
     }
 
     @Test
-    public void shouldNotChengeBalanceWhenExceptionWasThrown() throws Exception {
+    public void shouldNotChangeBalanceWhenExceptionWasThrown() throws Exception {
         from.setBalance(-501);
         Instrument sevenEUR = new Instrument(Currency.EUR, 7);
 
@@ -109,11 +113,13 @@ public class PaymentServiceTest {
         assertThat(to1.getBalance().getAmount()).isEqualTo(100);
     }
 
+
     @Test
     public void shouldCallExchangeServiceWhenCurrencyIsDifferentOnToAccount() throws Exception {
         Account to = new Account("to1", 100, Currency.PLN);
         Instrument transferMoney = new Instrument(Currency.EUR, 10);
-        ExchangeService exchangeService = Mockito.mock(ExchangeService.class);
+        ExchangeService exchangeService = mock(ExchangeService.class);
+
         testedObject.setExchangeService(exchangeService);
 
         testedObject.transferMoney(from, to, transferMoney);
@@ -125,10 +131,22 @@ public class PaymentServiceTest {
     }
 
     @Test
+    public void ShouldCheckIfMethodSaveIsCalled() {
+        Account to = new Account("to1", 100, Currency.PLN);
+        Instrument transferMoney = new Instrument(Currency.EUR, 10);
+        ExchangeService exchangeService = mock(ExchangeService.class);
+        testedObject.setExchangeService(exchangeService);
+
+        testedObject.transferMoney(from, to, transferMoney);
+
+        Mockito.verify(transactionDB, times(1)).save(from, to, transferMoney);
+    }
+
+    @Test
     public void shouldUseValueFromExchangeServiceWhenCurrencyIsDifferentOnToAccount() throws Exception {
         Account to = new Account("to1", 100, Currency.PLN);
         Instrument transferMoney = new Instrument(Currency.EUR, 10);
-        ExchangeService exchangeService = Mockito.mock(ExchangeService.class);
+        ExchangeService exchangeService = mock(ExchangeService.class);
         testedObject.setExchangeService(exchangeService);
         Mockito.when(exchangeService.calculate(transferMoney, Currency.PLN))
                 .thenReturn(40);

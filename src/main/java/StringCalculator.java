@@ -7,7 +7,7 @@ public class StringCalculator {
             return 0;
         } else {
             String list[];
-            Integer newList[] = null;
+            //Integer newList[] = null;
             list = numbers.split(",");
             int summary = 0;
             for (String i : list) {
