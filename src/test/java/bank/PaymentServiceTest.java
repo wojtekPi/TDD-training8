@@ -7,16 +7,23 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mockingDetails;
+import static org.mockito.Mockito.times;
 
 @RunWith(JUnitParamsRunner.class)
 public class PaymentServiceTest {
     private static final String FROM = "from";
     private static final String TO = "to";
     private static final String NOT_ENOUGH_MONEY_TEXT = "I'm very sorry, but you don't have enough money...";
+    public static final String CURRENCIES_ARE_INCOMPATIBILE = "Currencies  are incompatibile ";
     private PaymentService testedObject;
+    private TransactionDB transactionDB;
+    private ExchangeService exchangeService;
     private Account from;
     private Account to;
 
@@ -27,8 +34,10 @@ public class PaymentServiceTest {
     @Before
     public void setUp() {
         testedObject = new PaymentService();
-        from = new Account(FROM, 0,Currency.EUR );
-        to = new Account(TO,new Instrument(Currency.EUR,0));
+        from = new Account(FROM, 0, Currency.EUR);
+        to = new Account(TO, 0, Currency.EUR);
+        this.transactionDB = Mockito.mock(TransactionDB.class);
+        this.exchangeService = Mockito.mock(ExchangeService.class);
     }
 
 
@@ -50,7 +59,7 @@ public class PaymentServiceTest {
 
 
         Instrument instrument = new Instrument(Currency.EUR, transactionAmount);
-
+        testedObject.setDatabaseAccess(transactionDB);
         testedObject.transferMoney(from, to, instrument);
 
         assertThat(from.getBalance().getAmount()).isEqualTo(fromExpected);
@@ -92,4 +101,59 @@ public class PaymentServiceTest {
         assertThat(to.getBalance().getAmount()).isEqualTo(0);
     }
 
+    @Test
+    public void shouldThrowExceptionWhenAllCurrenciesAreNotCompatibile() {
+        Account from1 = new Account("from1", 100, Currency.EUR);
+        Account to1 = new Account("to1", 100, Currency.EUR);
+        Instrument transferMoney = new Instrument(Currency.PLN, 10);
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> testedObject.transferMoney(from1, to1, transferMoney))
+                .withMessage(CURRENCIES_ARE_INCOMPATIBILE);
+
+        assertThat(from1.getBalance().getAmount()).isEqualTo(100);
+        assertThat(to1.getBalance().getAmount()).isEqualTo(100);
+    }
+
+    @Test
+    public void shouldCallExchangeServiceWhenCurrencyIsDifferentOnToAccount() throws Exception {
+        Account to = new Account("to1", 100, Currency.PLN);
+        Instrument transferMoney = new Instrument(Currency.EUR, 10);
+        testedObject.setExchangeService(exchangeService);
+        testedObject.setDatabaseAccess(transactionDB);
+        testedObject.transferMoney(from, to, transferMoney);
+
+        Mockito.verify(exchangeService, times(1))
+                .calculate(transferMoney, Currency.PLN);
+
+        assertThat(to.getBalance().getAmount()).isEqualTo(100);
+    }
+
+    @Test
+    public void shouldUseValueFromExchangeServiceWhenCurrencyIsDifferentOnToAccount() throws Exception {
+        Account to = new Account("to1", 100, Currency.PLN);
+        Instrument transferMoney = new Instrument(Currency.EUR, 10);
+        testedObject.setExchangeService(exchangeService);
+        testedObject.setDatabaseAccess(transactionDB);
+        Mockito.when(exchangeService.calculate(transferMoney, Currency.PLN))
+                .thenReturn(40);
+
+        testedObject.transferMoney(from, to, transferMoney);
+
+        assertThat(to.getBalance().getAmount()).isEqualTo(140);
+    }
+
+    @Test
+    public  void shouldSaveDateToDababaseWhenTransferIsCaled() throws  Exception{
+        Account to = new Account("to1", 100, Currency.PLN);
+        Instrument transferMoney = new Instrument(Currency.EUR, 10);
+        testedObject.setDatabaseAccess (transactionDB);
+        testedObject.setExchangeService(exchangeService);
+
+        testedObject.transferMoney(from, to, transferMoney);
+
+        Mockito.verify(transactionDB).save(from, to, transferMoney);
+
+        //assertThat(to.getBalance().getAmount()).isEqualTo(140);
+    }
 }

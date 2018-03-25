@@ -42,4 +42,12 @@ public class Instrument {
 
         return Objects.hash(getCurrency(), getAmount());
     }
+
+    @Override
+    public String toString() {
+        return "Instrument{" +
+                "currency=" + currency +
+                ", amount=" + amount +
+                '}';
+    }
 }

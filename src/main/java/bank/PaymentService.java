@@ -4,12 +4,36 @@ public class PaymentService {
     private static final int LIMIT_AMOUNT = -500;
     private static final String NOT_ENOUGH_MONEY_TEXT =
             "I'm very sorry, but you don't have enough money...";
+    public static final String CURRENCIES_ARE_INCOMPATIBILE = "Currencies  are incompatibile ";
 
-    public void transferMoney(Account from , Account to, Instrument howMoney) {
+    private ExchangeService exchangeService;
+    private TransactionDB databaseAccess;
+
+
+    public void transferMoney(Account from, Account to, Instrument howMoney) {
         if (from.getBalance().getAmount() < LIMIT_AMOUNT) {
             throw new IllegalArgumentException(NOT_ENOUGH_MONEY_TEXT);
+        } else if (from.getBalance().getCurrency() != howMoney.getCurrency()) {
+            throw new IllegalArgumentException(CURRENCIES_ARE_INCOMPATIBILE);
         }
-        from.setBalance(from.getBalance().getAmount()-howMoney.getAmount());
-        to.setBalance(to.getBalance().getAmount()+howMoney.getAmount());
+
+        int targetAmountOnToAccount = to.getBalance().getAmount() + howMoney.getAmount();
+
+        if (from.getBalance().getCurrency() != to.getBalance().getCurrency()) {
+            targetAmountOnToAccount = to.getBalance().getAmount() +
+                    exchangeService.calculate(howMoney, to.getBalance().getCurrency());
+        }
+
+        from.setBalance(from.getBalance().getAmount() - howMoney.getAmount());
+        to.setBalance(targetAmountOnToAccount);
+         databaseAccess.save(from,to,howMoney);
+    }
+
+    public void setExchangeService(ExchangeService exchangeService) {
+        this.exchangeService = exchangeService;
+    }
+
+    public void setDatabaseAccess(TransactionDB transaction) {
+        this.databaseAccess = transaction;
     }
 }
