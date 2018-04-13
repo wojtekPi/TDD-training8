@@ -22,13 +22,13 @@ public class StringCalculatorTest {
     }
 
     @Test
-    public void shouldReturnZeroForEmptyString() {
+    public void shouldReturnZeroForEmptyString() throws Exception {
         int result = testedObject.Add("");
         assertThat(result).isEqualTo(0);
     }
 
     @Test
-    public void shouldReturnOneForStringOne() {
+    public void shouldReturnOneForStringOne() throws Exception {
 
         int result = testedObject.Add("1");
 
@@ -36,42 +36,42 @@ public class StringCalculatorTest {
     }
 
     @Test
-    public void shouldReturnThreeForStringsOneandTwo() {
+    public void shouldReturnThreeForStringsOneandTwo() throws Exception {
         int result = testedObject.Add("1,2");
         assertThat(result).isEqualTo(3);
     }
 
     @Test
-    public void shouldReturn1112For1000Plus112() {
+    public void shouldReturn1112For1000Plus112() throws Exception {
         int result = testedObject.Add("1000,112");
         assertThat(result).isEqualTo(1112);
     }
 
     @Test
-    public void shouldReturnMinus10For10PlusMinus10() {
+    public void shouldReturnMinus10For10PlusMinus10() throws Exception {
         int result = testedObject.Add("0,-10");
         assertThat(result).isEqualTo(-10);
     }
 
     @Test
-    public void shouldReturnMinusForMinusArguments() {
+    public void shouldReturnMinusForMinusArguments() throws Exception {
         int result = testedObject.Add("-3,-4");
         assertThat(result).isEqualTo(-7);
     }
 
     @Test
-    public void shouldReturnMinusForZeroPlusMinusArgument() {
+    public void shouldReturnMinusForZeroPlusMinusArgument() throws Exception {
         int result = testedObject.Add("0,-4");
         assertThat(result).isEqualTo(-4);
     }
 
     @Test
-    public void shouldReturnSummaryForThreeArguments() {
+    public void shouldReturnSummaryForThreeArguments() throws Exception {
         int result = testedObject.Add("12,8,10");
         assertThat(result).isEqualTo(30);
     }
     @Test
-    public void shouldReturnSummaryForFourArguments(){
+    public void shouldReturnSummaryForFourArguments() throws Exception {
         int result = testedObject.Add("14,-7,7,10");
         assertThat(result).isEqualTo(24);
     }
